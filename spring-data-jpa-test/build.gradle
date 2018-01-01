@@ -1,0 +1,38 @@
+group 'com.silencecorner'
+version '0.0.1-SNAPSHOT'
+
+ext { springBootVersion = '1.5.9.RELEASE' }
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'io.spring.dependency-management'
+// not support for 3.4 or latest,use compileOnly
+//apply plugin: 'nebula.provided-base'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven {url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+    mavenCentral()
+}
+
+
+dependencies {
+    // web starter
+    compile "org.springframework.boot:spring-boot-starter-web"
+
+    // JPA Data (We are going to use Repositories, Entities, Hibernate, etc...)
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Use MySQL Connector-J
+    compile 'mysql:mysql-connector-java'
+
+    // test
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.16.18'
+}
+dependencyManagement {
+    imports { mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}") }
+}
