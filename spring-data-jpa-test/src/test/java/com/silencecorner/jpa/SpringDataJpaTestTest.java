@@ -2,6 +2,7 @@ package com.silencecorner.jpa;
 
 import com.silencecorner.jpa.dto.UserDto;
 import com.silencecorner.jpa.model.User;
+import com.silencecorner.jpa.model.Wallet;
 import com.silencecorner.jpa.repos.UserRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,5 +76,17 @@ public class SpringDataJpaTestTest {
     public void find(){
        User user = userDao.findUserByMobile("13212345678");
        System.out.print(user.toString());
+    }
+    @Test
+    public void oneToOneCascadeTest(){
+        User user = new User();
+        user.setUsername("海哥4");
+        user.setEmail("hilin2333@gmail.com");
+        user.setMobile("15281718794");
+        user.setStatus(1);
+        user.setWallet(Wallet.builder().balance(1111111).build());
+        userDao.save(user);
+        User selectUser = userDao.findUserByMobile("15281718794");
+        System.out.println("用户余额：" + selectUser.getWallet().getBalance());
     }
 }

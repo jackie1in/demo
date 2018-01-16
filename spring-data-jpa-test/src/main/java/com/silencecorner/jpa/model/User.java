@@ -1,6 +1,9 @@
 package com.silencecorner.jpa.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -14,6 +17,9 @@ import java.util.UUID;
  * @email hilin2333@gmail.com
  * @date 30/12/2017 5:14 PM
  */
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Entity
 public class User implements Serializable {
@@ -76,5 +82,7 @@ public class User implements Serializable {
      */
     private Date createDate;
 
+    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.PERSIST)
+    private Wallet wallet;
 
 }
