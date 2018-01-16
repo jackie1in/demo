@@ -15,8 +15,8 @@ import javax.persistence.*;
  * @date 16/01/2018 2:26 PM
  */
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Entity
 public class Wallet {

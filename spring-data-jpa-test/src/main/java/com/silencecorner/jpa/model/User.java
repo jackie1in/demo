@@ -18,8 +18,8 @@ import java.util.UUID;
  * @date 30/12/2017 5:14 PM
  */
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Entity
 public class User implements Serializable {

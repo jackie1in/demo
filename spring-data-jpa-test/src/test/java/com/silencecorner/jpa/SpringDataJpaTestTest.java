@@ -4,6 +4,7 @@ import com.silencecorner.jpa.dto.UserDto;
 import com.silencecorner.jpa.model.User;
 import com.silencecorner.jpa.model.Wallet;
 import com.silencecorner.jpa.repos.UserRepository;
+import com.silencecorner.jpa.repos.WalletRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.BeanUtils;
@@ -26,6 +27,8 @@ import java.util.List;
 public class SpringDataJpaTestTest {
     @Resource
     private UserRepository userDao;
+    @Resource
+    private WalletRepository walletDao;
     @Test
     public void save(){
         User user = new User();
@@ -88,5 +91,14 @@ public class SpringDataJpaTestTest {
         userDao.save(user);
         User selectUser = userDao.findUserByMobile("15281718794");
         System.out.println("用户余额：" + selectUser.getWallet().getBalance());
+    }
+    @Test
+    public void oneToOneCascadeSelectTest(){
+        User selectUser = userDao.findUserByMobile("15281718794");
+        System.out.println("用户名称1：" + selectUser.getWallet().getUser().getUsername());
+        String uuid = selectUser.getWallet().getUid();
+        Wallet wallet = (Wallet) walletDao.findOne(uuid);
+
+        System.out.println("用户名称1：" + wallet.getUser().getUsername());
     }
 }
