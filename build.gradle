@@ -1,8 +1,6 @@
 buildscript {
-	ext {
-		springBootVersion = '1.5.9.RELEASE'
-	}
 	repositories {
+		mavenLocal()
 		maven {url 'http://maven.aliyun.com/nexus/content/groups/public/'}
 		mavenCentral()
 	}
@@ -12,28 +10,40 @@ buildscript {
 	}
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'idea'
+	group "$group"
+	version = '0.0.1-SNAPSHOT'
 
-group = 'com.silencecorner'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
 
-tasks.withType(JavaCompile) {
-	options.encoding = 'UTF-8'
+
+	tasks.withType(JavaCompile) {
+		options.encoding = 'UTF-8'
+	}
+
+
+	repositories {
+		mavenLocal()
+		maven {url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+		mavenCentral()
+	}
+
+	// spring boot项目使用插件管理项目
+	if (it.name.startsWith('springboot')) {
+		apply plugin: 'io.spring.dependency-management'
+
+		dependencies {
+			compile('org.springframework.boot:spring-boot-starter')
+			testCompile('org.springframework.boot:spring-boot-starter-test')
+		}
+		dependencyManagement {
+			imports {
+				mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+			}
+		}
+	}
 }
 
-repositories {
-	maven {url 'http://maven.aliyun.com/nexus/content/groups/public/'}
-	mavenCentral()
-}
-
-
-dependencies {
-	compile('org.springframework.boot:spring-boot-starter')
-	compile("org.springframework.boot:spring-boot-starter-web")
-	testCompile('org.springframework.boot:spring-boot-starter-test')
-}
