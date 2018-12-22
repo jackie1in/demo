@@ -1,13 +1,9 @@
 package com.silencecorner.jpa.repos;
 
 import com.silencecorner.jpa.model.User;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * @author hai
@@ -16,7 +12,7 @@ import java.util.UUID;
  * @date 30/12/2017 5:47 PM
  */
 @Repository
-public interface UserRepository<T,String extends Serializable> extends JpaRepository<User,String>{
+public interface UserRepository extends JpaRepository<User,String>{
     User findUserByMobile(String mobile);
-    List<T> findAllByStatus(Integer status, Class<T> type);
+    <T> List<T> findAllByStatus(Integer status,Class<T> tClass);
 }

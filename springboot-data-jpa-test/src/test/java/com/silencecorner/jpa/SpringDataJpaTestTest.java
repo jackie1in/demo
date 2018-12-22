@@ -5,16 +5,14 @@ import com.silencecorner.jpa.model.User;
 import com.silencecorner.jpa.model.Wallet;
 import com.silencecorner.jpa.repos.UserRepository;
 import com.silencecorner.jpa.repos.WalletRepository;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.CollectionUtils;
-
-import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author hai
@@ -29,6 +27,11 @@ public class SpringDataJpaTestTest {
     private UserRepository userDao;
     @Resource
     private WalletRepository walletDao;
+    @Test
+    public void deleteAll(){
+        userDao.deleteAll();
+        walletDao.deleteAll();
+    }
     @Test
     public void save(){
         User user = new User();
@@ -57,6 +60,7 @@ public class SpringDataJpaTestTest {
         userDao.save(users);
     }
     @Test
+    @SuppressWarnings("unchecked")
     public void dynamicProjectionTest(){
         //because of UserDto properties don't have setter,cannot be used for spring BeanUtils.copyProperties()  target argument
         List<UserDto> userDtoList = userDao.findAllByStatus(1, UserDto.class);
@@ -65,12 +69,12 @@ public class SpringDataJpaTestTest {
         }
         if (!CollectionUtils.isEmpty(userDtoList)){
             User user = new User();
-            BeanUtils.copyProperties(userDtoList.get(1),user);
+            user.setUid(userDtoList.get(0).getUid());
             user.setUsername("大海");
             user.setEmail("hilin2333@gmail.com");
-            user.setMobile("13212345679");
+            user.setMobile("13212345680");
             user.setStatus(1);
-            User newUser = (User) userDao.save(user);
+            User newUser = userDao.save(user);
             System.out.println(newUser.toString());
         }
     }
@@ -97,7 +101,7 @@ public class SpringDataJpaTestTest {
         User selectUser = userDao.findUserByMobile("15281718794");
         System.out.println("用户名称1：" + selectUser.getWallet().getUser().getUsername());
         String uuid = selectUser.getWallet().getUid();
-        Wallet wallet = (Wallet) walletDao.findOne(uuid);
+        Wallet wallet = walletDao.findOne(uuid);
 
         System.out.println("用户名称1：" + wallet.getUser().getUsername());
     }

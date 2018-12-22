@@ -1,7 +1,6 @@
 package com.silencecorner.jpa.dto;
 
-import lombok.Data;
-import lombok.Getter;
+import lombok.Value;
 
 /**
  * @author hai
@@ -10,8 +9,7 @@ import lombok.Getter;
  * @date 30/12/2017 10:53 PM
  */
 // 类中不能有static属性
-    @Data
-@Getter
+@Value
 public class UserDto {
     public UserDto(String uid, Integer status, String username) {
         this.uid = uid;
@@ -19,10 +17,10 @@ public class UserDto {
         this.username = username;
     }
 
-    private final String uid;
+    String uid;
 
-    private final Integer enable;
+    Integer enable;
 
-    private final String username;
+    String username;
 
 }
