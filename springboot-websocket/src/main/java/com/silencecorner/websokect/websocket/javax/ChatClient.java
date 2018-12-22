@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.websocket.ClientEndpoint;
+import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * date 2018/12/16 8:51 PM
  */
 @ClientEndpoint(decoders = MessageDecoder.class, encoders = MessageEncoder.class)
-public class ChatClient {
+public class ChatClient{
   AtomicInteger integer = new AtomicInteger(0);
   // 日志记录
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -82,17 +83,16 @@ public class ChatClient {
   @OnError
   public void onError(Throwable throwable) throws IOException {
     this.session.close();
-    logger.error("client on error");
-    throwable.printStackTrace();
+    logger.error("client on error",throwable);
   }
 
   /**
    * 连接关闭调用
    */
   @OnClose
-  public void onClose() throws IOException {
+  public void onClose(CloseReason reason) throws IOException {
     this.session.close();
-    logger.info("client on close");
+    logger.info("Closing a WebSocket due to {}",reason.getReasonPhrase());
     connect();
   }
 
