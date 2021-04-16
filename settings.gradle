@@ -1,4 +1,4 @@
-rootProject.name = 'jvm-demo'
+rootProject.name = 'demo'
 include 'springboot-data-jpa-test'
 include 'springboot-websocket'
 

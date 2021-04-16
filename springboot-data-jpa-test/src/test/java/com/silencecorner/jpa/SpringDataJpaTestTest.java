@@ -5,14 +5,14 @@ import com.silencecorner.jpa.model.User;
 import com.silencecorner.jpa.model.Wallet;
 import com.silencecorner.jpa.repos.UserRepository;
 import com.silencecorner.jpa.repos.WalletRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Resource;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.CollectionUtils;
+import java.util.Optional;
 
 /**
  * @author hai
@@ -21,7 +21,6 @@ import org.springframework.util.CollectionUtils;
  * @date 30/12/2017 5:50 PM
  */
 @SpringBootTest
-@RunWith(value = SpringRunner.class)
 public class SpringDataJpaTestTest {
     @Resource
     private UserRepository userDao;
@@ -57,7 +56,7 @@ public class SpringDataJpaTestTest {
         users.add(user);
         users.add(user1);
         userDao.deleteAll();
-        userDao.save(users);
+        userDao.saveAll(users);
     }
     @Test
     @SuppressWarnings("unchecked")
@@ -101,8 +100,11 @@ public class SpringDataJpaTestTest {
         User selectUser = userDao.findUserByMobile("15281718794");
         System.out.println("用户名称1：" + selectUser.getWallet().getUser().getUsername());
         String uuid = selectUser.getWallet().getUid();
-        Wallet wallet = walletDao.findOne(uuid);
+        Optional<Wallet> wallet = walletDao.findById(uuid);
+        wallet.ifPresent(w -> {
+            System.out.println("用户名称1：" + w.getUser().getUsername());
+        });
 
-        System.out.println("用户名称1：" + wallet.getUser().getUsername());
+
     }
 }
