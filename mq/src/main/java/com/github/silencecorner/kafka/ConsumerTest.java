@@ -17,14 +17,14 @@ public class ConsumerTest {
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new NamedThreadFactory("kafka-consumer"));
 
     public static void main(String[] args) {
-        int consumerCount  = 5;
+        int consumerCount = 5;
         final CountDownLatch latch = new CountDownLatch(1);
-
-        for (int i = 0; i < consumerCount; i++) {
-            EXECUTOR_SERVICE.execute(ConsumerTest::atMostOnce);
-            EXECUTOR_SERVICE.execute(ConsumerTest::atLeastOnceSync);
-            EXECUTOR_SERVICE.execute(ConsumerTest::exactlyOnceAndTransactionAndCommitSync);
-        }
+        EXECUTOR_SERVICE.execute(ConsumerTest::atMostOnce);
+//        for (int i = 0; i < consumerCount; i++) {
+//            EXECUTOR_SERVICE.execute(ConsumerTest::atMostOnce);
+//            EXECUTOR_SERVICE.execute(ConsumerTest::atLeastOnceSync);
+//            EXECUTOR_SERVICE.execute(ConsumerTest::exactlyOnceAndTransactionAndCommitSync);
+//        }
         try {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 latch.countDown();
@@ -41,22 +41,27 @@ public class ConsumerTest {
         props.put("group.id", "test");
         props.put("enable.auto.commit", true);
         props.put("auto.commit.interval.ms", 1000);
-        Consumer<Integer,Integer> consumer = new KafkaConsumer<>(props);
+        ConsumerWorkHandler<String, String> consumer = ConsumerWorkHandler.defaultHandler("localhost:9092,localhost:9093,localhost:9094,localhost:9095,localhost:9096", 5);
         final CountDownLatch latch = new CountDownLatch(1);
 
-        while (latch.getCount() > 0){
+        while (latch.getCount() > 0) {
             // 消费所有的partition上的消息，在客户端上会收到所有partition leader上的消息，消息不会重复但是会乱序
             // consumer.subscribe(Common.AT_MOST_ONCE);
             // 消费一个partition上的消息不会乱序
-            consumer.assign(Collections.singleton(new TopicPartition(Common.AT_MOST_ONCE.get(0),0)));
-            // poll所有消息
-            ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
-            for (ConsumerRecord<Integer, Integer> record : records){
-                System.out.printf("thread = %s topic = %s partition = %s offset = %s \n" ,Thread.currentThread().getName(), record.topic() , record.partition() , record.offset());
-            }
+            consumer.assign(Collections.singleton(new TopicPartition(Common.AT_MOST_ONCE.get(0), 0)));
+            consumer.execute(Duration.ofSeconds(10), 1000, record -> {
+                System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
+                        Thread.currentThread().getName(),
+                        record.topic(),
+                        record.partition(),
+                        record.offset(),
+                        record.key(),
+                        record.value());
+                return null;
+            });
         }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            consumer.close();
+            consumer.shutdown();
             latch.countDown();
         }));
         try {
@@ -70,15 +75,21 @@ public class ConsumerTest {
         Properties props = commonConfig();
         props.put("group.id", "test");
         props.put("enable.auto.commit", false);
-        Consumer<Integer,Integer> consumer = new KafkaConsumer<>(props);
+        Consumer<Integer, Integer> consumer = new KafkaConsumer<>(props);
         final CountDownLatch latch = new CountDownLatch(1);
 
-        while (latch.getCount() > 0){
+        while (latch.getCount() > 0) {
             consumer.subscribe(Common.AT_LEAST_ONCE);
             // poll所有消息
             ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
-            for (ConsumerRecord<Integer, Integer> record : records){
-                System.out.printf("thread = %s topic = %s partition = %s offset = %s \n" ,Thread.currentThread().getName(), record.topic() , record.partition() , record.offset());
+            for (ConsumerRecord<Integer, Integer> record : records) {
+                System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
+                        Thread.currentThread().getName(),
+                        record.topic(),
+                        record.partition(),
+                        record.offset(),
+                        record.key(),
+                        record.value());
             }
             consumer.commitSync();
         }
@@ -100,15 +111,21 @@ public class ConsumerTest {
         // 设置数据可见行
         props.put("isolation.level", "read_committed");
 
-        Consumer<Integer,Integer> consumer = new KafkaConsumer<>(props);
+        Consumer<Integer, Integer> consumer = new KafkaConsumer<>(props);
         final CountDownLatch latch = new CountDownLatch(1);
 
-        while (latch.getCount() > 0){
+        while (latch.getCount() > 0) {
             consumer.subscribe(Common.EXACTLY_ONCE_AND_TRANSACTION);
             // poll所有消息
             ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
-            for (ConsumerRecord<Integer, Integer> record : records){
-                System.out.printf("thread = %s topic = %s partition = %s offset = %s \n" ,Thread.currentThread().getName(), record.topic() , record.partition() , record.offset());
+            for (ConsumerRecord<Integer, Integer> record : records) {
+                System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
+                        Thread.currentThread().getName(),
+                        record.topic(),
+                        record.partition(),
+                        record.offset(),
+                        record.key(),
+                        record.value());
             }
             consumer.commitSync();
         }
@@ -122,10 +139,11 @@ public class ConsumerTest {
             e.printStackTrace();
         }
     }
-    private static Properties commonConfig(){
+
+    private static Properties commonConfig() {
         Properties props = new Properties();
         // 这里可以不用写完
-        props.put("bootstrap.servers","localhost:9092,localhost:9093,localhost:9094,localhost:9095,localhost:9096");
+        props.put("bootstrap.servers", "localhost:9092,localhost:9093,localhost:9094,localhost:9095,localhost:9096");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.IntegerDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.IntegerDeserializer");
         return props;
