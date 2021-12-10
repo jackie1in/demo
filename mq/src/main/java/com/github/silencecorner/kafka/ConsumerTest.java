@@ -46,9 +46,9 @@ public class ConsumerTest {
 
         while (latch.getCount() > 0) {
             // 消费所有的partition上的消息，在客户端上会收到所有partition leader上的消息，消息不会重复但是会乱序
-            // consumer.subscribe(Common.AT_MOST_ONCE);
-            // 消费一个partition上的消息不会乱序
-            consumer.assign(Collections.singleton(new TopicPartition(Common.AT_MOST_ONCE.get(0), 0)));
+            consumer.subscribe(Common.AT_MOST_ONCE);
+            // 消费一个partition上的消息不会乱序，顺序消费最好不要使用多线程
+            // consumer.assign(Collections.singleton(new TopicPartition(Common.AT_MOST_ONCE.get(0), 0)));
             consumer.execute(Duration.ofSeconds(10), 1000, record -> {
                 System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
                         Thread.currentThread().getName(),
