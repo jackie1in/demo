@@ -1,11 +1,11 @@
 package com.silencecorner.io;
 
+import com.silencecorner.io.streams.DataStreams;
 import com.silencecorner.io.streams.ObjectStreams;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class JavaIO {
     /**
@@ -44,7 +44,7 @@ public class JavaIO {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         ObjectStreams objectStreams = new ObjectStreams();
         System.out.println("----- 对象流测试开始 ------");
         objectStreams.objectOutputStreamTest();
@@ -54,5 +54,15 @@ public class JavaIO {
         objectStreams.objectOutputStreamExternalizableTest();
         objectStreams.objectInputStreamExternalizableTest();
         System.out.println("----- 对象流测试结束 ------");
+
+        DataStreams dataStreams = new DataStreams();
+        System.out.println("-----数据流测试开始 ------");
+        dataStreams.dataOutputStreamTest();
+        dataStreams.dataInputStreamTest();
+        System.out.println("-----数据流测试结束 ------");
+        File file = new File("fewf");
+        file.deleteOnExit();
+        Path path = Files.createTempFile(null,"x.txt");
+        Files.delete(path);
     }
 }
