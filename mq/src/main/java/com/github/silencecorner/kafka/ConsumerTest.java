@@ -26,9 +26,7 @@ public class ConsumerTest {
 //            EXECUTOR_SERVICE.execute(ConsumerTest::exactlyOnceAndTransactionAndCommitSync);
 //        }
         try {
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                latch.countDown();
-            }));
+            Runtime.getRuntime().addShutdownHook(new Thread(latch::countDown));
             latch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -41,12 +39,11 @@ public class ConsumerTest {
         props.put("group.id", "test");
         props.put("enable.auto.commit", true);
         props.put("auto.commit.interval.ms", 1000);
-        ConsumerWorkHandler<String, String> consumer = ConsumerWorkHandler.defaultHandler("localhost:9092,localhost:9093,localhost:9094,localhost:9095,localhost:9096", 5);
+        ConsumerWorkHandler<Integer, Integer> consumer = ConsumerWorkHandler.defaultHandler("localhost:9092,localhost:9093,localhost:9094,localhost:9095,localhost:9096", 5);
         final CountDownLatch latch = new CountDownLatch(1);
-
+        consumer.subscribe(Common.AT_MOST_ONCE);
         while (latch.getCount() > 0) {
             // 消费所有的partition上的消息，在客户端上会收到所有partition leader上的消息，消息不会重复但是会乱序
-            consumer.subscribe(Common.AT_MOST_ONCE);
             // 消费一个partition上的消息不会乱序，顺序消费最好不要使用多线程
             // consumer.assign(Collections.singleton(new TopicPartition(Common.AT_MOST_ONCE.get(0), 0)));
             consumer.execute(Duration.ofSeconds(10), 1000, record -> {
@@ -77,11 +74,13 @@ public class ConsumerTest {
         props.put("enable.auto.commit", false);
         Consumer<Integer, Integer> consumer = new KafkaConsumer<>(props);
         final CountDownLatch latch = new CountDownLatch(1);
-
+        consumer.subscribe(Common.AT_LEAST_ONCE);
         while (latch.getCount() > 0) {
-            consumer.subscribe(Common.AT_LEAST_ONCE);
             // poll所有消息
             ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
+            if (records.isEmpty()){
+                continue;
+            }
             for (ConsumerRecord<Integer, Integer> record : records) {
                 System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
                         Thread.currentThread().getName(),
@@ -113,11 +112,13 @@ public class ConsumerTest {
 
         Consumer<Integer, Integer> consumer = new KafkaConsumer<>(props);
         final CountDownLatch latch = new CountDownLatch(1);
-
+        consumer.subscribe(Common.EXACTLY_ONCE_AND_TRANSACTION);
         while (latch.getCount() > 0) {
-            consumer.subscribe(Common.EXACTLY_ONCE_AND_TRANSACTION);
             // poll所有消息
             ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
+            if (records.isEmpty()){
+                continue;
+            }
             for (ConsumerRecord<Integer, Integer> record : records) {
                 System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
                         Thread.currentThread().getName(),

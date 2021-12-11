@@ -23,9 +23,8 @@ public class ConsumerWorkHandler<K, V> {
 
     private boolean autoCommit;
 
-    public static ConsumerWorkHandler defaultHandler(String bootstrapServers, int workPoolSize) {
-
-        return new ConsumerWorkHandler(bootstrapServers,
+    public static ConsumerWorkHandler<Integer,Integer> defaultHandler(String bootstrapServers, int workPoolSize) {
+        return new ConsumerWorkHandler<>(bootstrapServers,
                 new IntegerDeserializer(),
                 new IntegerDeserializer(),
                 "handler-group-id",
