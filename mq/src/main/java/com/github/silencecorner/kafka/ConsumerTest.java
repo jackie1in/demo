@@ -4,106 +4,87 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConsumerTest {
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new NamedThreadFactory("kafka-consumer"));
+    private final static Logger logger = LoggerFactory.getLogger(ConsumerTest.class);
+    // 不实用线程池运行，这些线程需要一直执行，使用线程池属于浪费，只有当进程kill时会被关闭
+    // private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new NamedThreadFactory("kafka-consumer"));
+    private static AtomicBoolean closed = new AtomicBoolean(false);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         int consumerCount = 5;
-        final CountDownLatch latch = new CountDownLatch(1);
-        EXECUTOR_SERVICE.execute(ConsumerTest::atMostOnce);
+        ConsumerWorkHandler<?, ?> consumerWorkHandler = ConsumerTest.atMostOnce();
 //        for (int i = 0; i < consumerCount; i++) {
 //            EXECUTOR_SERVICE.execute(ConsumerTest::atMostOnce);
 //            EXECUTOR_SERVICE.execute(ConsumerTest::atLeastOnceSync);
 //            EXECUTOR_SERVICE.execute(ConsumerTest::exactlyOnceAndTransactionAndCommitSync);
 //        }
-        try {
-            Runtime.getRuntime().addShutdownHook(new Thread(latch::countDown));
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public static void atMostOnce() {
-        Properties props = commonConfig();
-        props.put("group.id", "test");
-        props.put("enable.auto.commit", true);
-        props.put("auto.commit.interval.ms", 1000);
-        ConsumerWorkHandler<Integer, Integer> consumer = ConsumerWorkHandler.defaultHandler("localhost:9092,localhost:9093,localhost:9094,localhost:9095,localhost:9096", 5);
-        final CountDownLatch latch = new CountDownLatch(1);
-        consumer.subscribe(Common.AT_MOST_ONCE);
-        while (latch.getCount() > 0) {
-            // 消费所有的partition上的消息，在客户端上会收到所有partition leader上的消息，消息不会重复但是会乱序
-            // 消费一个partition上的消息不会乱序，顺序消费最好不要使用多线程
-            // consumer.assign(Collections.singleton(new TopicPartition(Common.AT_MOST_ONCE.get(0), 0)));
-            consumer.execute(Duration.ofSeconds(10), 1000, record -> {
-                System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
-                        Thread.currentThread().getName(),
-                        record.topic(),
-                        record.partition(),
-                        record.offset(),
-                        record.key(),
-                        record.value());
-                return null;
-            });
-        }
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            consumer.shutdown();
-            latch.countDown();
+            closed.set(true);
+            consumerWorkHandler.shutdown();
+            countDownLatch.countDown();
+            logger.info("shutdown...");
         }));
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        countDownLatch.await();
     }
 
-    public static void atLeastOnceSync() {
+    public static ConsumerWorkHandler<?, ?> atMostOnce() {
+        ConsumerWorkHandler<Integer, Integer> consumer = ConsumerWorkHandler.defaultHandler("localhost:9092,localhost:9093",
+                5,
+                10000,
+                2000,
+                record -> {
+                    System.out.printf("thread = %s topic = %s partition = %s offset = %s value=%s \n",
+                            Thread.currentThread().getName(),
+                            record.topic(),
+                            record.partition(),
+                            record.offset(),
+                            record.value());
+                    return null;
+                });
+        consumer.subscribe(Common.AT_MOST_ONCE);
+        new Thread(consumer).start();
+        return consumer;
+
+    }
+
+    public static Consumer<?, ?> atLeastOnceSync() {
         Properties props = commonConfig();
         props.put("group.id", "test");
         props.put("enable.auto.commit", false);
         Consumer<Integer, Integer> consumer = new KafkaConsumer<>(props);
-        final CountDownLatch latch = new CountDownLatch(1);
         consumer.subscribe(Common.AT_LEAST_ONCE);
-        while (latch.getCount() > 0) {
-            // poll所有消息
-            ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
-            if (records.isEmpty()){
-                continue;
+        new Thread(() -> {
+            while (!closed.get()) {
+                // poll所有消息
+                ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
+                if (records.isEmpty()) {
+                    continue;
+                }
+                for (ConsumerRecord<Integer, Integer> record : records) {
+                    System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
+                            Thread.currentThread().getName(),
+                            record.topic(),
+                            record.partition(),
+                            record.offset(),
+                            record.key(),
+                            record.value());
+                }
+                consumer.commitSync();
             }
-            for (ConsumerRecord<Integer, Integer> record : records) {
-                System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
-                        Thread.currentThread().getName(),
-                        record.topic(),
-                        record.partition(),
-                        record.offset(),
-                        record.key(),
-                        record.value());
-            }
-            consumer.commitSync();
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            consumer.close();
-            latch.countDown();
-        }));
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        }).start();
+        return consumer;
     }
 
-    public static void exactlyOnceAndTransactionAndCommitSync() {
+    public static Consumer<?, ?> exactlyOnceAndTransactionAndCommitSync() {
         Properties props = commonConfig();
         props.put("group.id", "test");
         props.put("enable.auto.commit", false);
@@ -111,34 +92,27 @@ public class ConsumerTest {
         props.put("isolation.level", "read_committed");
 
         Consumer<Integer, Integer> consumer = new KafkaConsumer<>(props);
-        final CountDownLatch latch = new CountDownLatch(1);
         consumer.subscribe(Common.EXACTLY_ONCE_AND_TRANSACTION);
-        while (latch.getCount() > 0) {
-            // poll所有消息
-            ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
-            if (records.isEmpty()){
-                continue;
+        new Thread(() -> {
+            while (!closed.get()) {
+                // poll所有消息
+                ConsumerRecords<Integer, Integer> records = consumer.poll(Duration.ofSeconds(3));
+                if (records.isEmpty()) {
+                    continue;
+                }
+                for (ConsumerRecord<Integer, Integer> record : records) {
+                    System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
+                            Thread.currentThread().getName(),
+                            record.topic(),
+                            record.partition(),
+                            record.offset(),
+                            record.key(),
+                            record.value());
+                }
+                consumer.commitSync();
             }
-            for (ConsumerRecord<Integer, Integer> record : records) {
-                System.out.printf("thread = %s topic = %s partition = %s offset = %s key=%s value=%s \n",
-                        Thread.currentThread().getName(),
-                        record.topic(),
-                        record.partition(),
-                        record.offset(),
-                        record.key(),
-                        record.value());
-            }
-            consumer.commitSync();
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            consumer.close();
-            latch.countDown();
-        }));
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        }).start();
+        return consumer;
     }
 
     private static Properties commonConfig() {
