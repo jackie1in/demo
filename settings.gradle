@@ -3,4 +3,5 @@ include 'springboot-data-jpa-test'
 include 'springboot-websocket'
 include 'elementary-knowledge'
 include 'mq'
+include 'sort'
 
