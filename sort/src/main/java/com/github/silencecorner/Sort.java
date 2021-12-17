@@ -216,7 +216,7 @@ public class Sort {
      * 先分解为一个一个的数字 <br>
      * 第一次 0 + 3 / 2 = 1：4,2 3,1 start 0 mid 1 end 3 <br>
      * 第二次 0 + 1 / 2 = 0： 4 2 3,1 start 0 mid 0 end 1 <br>
-     * 第三次 1 + 1 + 3 / 2 = 2   4 2 3 1 start 2 mid 1 + 1 end 3 <br>
+     * 第三次 1 + 1 + 3 / 2 = 2   4 2 3 1 start 1 + 1 mid 2 end 3 <br>
      * </p>
      * <table>
      * <tr>
