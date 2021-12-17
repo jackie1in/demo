@@ -16,6 +16,7 @@ class SortTest {
     public static void init0() {
         numSorted = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     }
+
     @BeforeEach
     public void init1() {
         nums = new int[]{8, 10, 9, 11, 4, 7, 3, 5, 2, 1, 6};
@@ -25,24 +26,55 @@ class SortTest {
     @Test
     void shellSort() {
         Sort.shellSort(nums);
-        assertArrayEquals(numSorted,nums);
+        assertArrayEquals(numSorted, nums);
     }
 
     @Test
     void selectOrder() {
         Sort.selectOrder(nums);
-        assertArrayEquals(numSorted,nums);
+        assertArrayEquals(numSorted, nums);
     }
 
     @Test
     void insertSort() {
         Sort.insertSort(nums);
-        assertArrayEquals(numSorted,nums);
+        assertArrayEquals(numSorted, nums);
     }
 
     @Test
     void bubbleSort() {
         Sort.bubbleSort(nums);
-        assertArrayEquals(numSorted,nums);
+        assertArrayEquals(numSorted, nums);
+    }
+
+    @Test
+    void quickSort() {
+        Sort.quickSort(0, nums.length - 1, nums);
+        assertArrayEquals(numSorted, nums);
+    }
+
+    @Test
+    void quickSortFirst() {
+        Sort.quickSortFirst(0, nums.length - 1, nums);
+        assertArrayEquals(numSorted, nums);
+    }
+
+    @Test
+    void quickSort1() {
+        Sort.quickSort1(0, nums.length - 1, nums);
+        assertArrayEquals(numSorted, nums);
+    }
+
+    @Test
+    void mergeSort() {
+        Sort.mergeSort(nums);
+        assertArrayEquals(numSorted, nums);
+    }
+
+    @Test
+    void radixSort() {
+        // TODO 基数排序
+        Sort.radixSort(nums);
+        // assertArrayEquals(numSorted, nums);
     }
 }
