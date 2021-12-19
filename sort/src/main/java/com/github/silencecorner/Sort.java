@@ -1,5 +1,7 @@
 package com.github.silencecorner;
 
+import java.util.Arrays;
+
 public class Sort {
 
     public static void insertSort(int[] nums) {
@@ -249,9 +251,10 @@ public class Sort {
      *  <p>
      * 获取到较小值放到缓存数组中，后面的一次当道缓存数组中，然后放回到原始数组中去 <br>
      * 第一次合并： 4 > 2 => 2,4  [2,4] <br>
-     * 第二次合并： 3 > 2 => 2,4,3 [2,3,4] <br>
-     * 第三次合并： 1 > 2 => 1,2,3,4 [1,2,3,4] <br>
+     * 第二次合并： 1 > 3 => 1,3 [1,3] <br>
+     * 第三次合并： 1 > 2 ,3 > 4=> 1,2,3,4 [1,2,3,4] <br>
      * </p>
+     *
      * @param nums  原数组
      * @param start 合并的开始坐标
      * @param mid   合并的开始坐标
@@ -282,6 +285,7 @@ public class Sort {
         for (int x = 0; x < k; x++) {
             nums[start + x] = tmp[x];
         }
+        System.out.printf("start: %d mid: %d end: %d tmp: %s\n", start, mid, end, Arrays.toString(tmp));
     }
 
 
