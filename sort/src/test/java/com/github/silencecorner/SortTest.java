@@ -11,6 +11,7 @@ class SortTest {
     private int[] nums;
     private static int[] numSorted;
 
+    private int[] numsBest;
 
     @BeforeAll
     public static void init0() {
@@ -20,6 +21,7 @@ class SortTest {
     @BeforeEach
     public void init1() {
         nums = new int[]{8, 10, 9, 11, 4, 7, 3, 5, 2, 1, 6};
+        numsBest = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     }
 
 
@@ -45,6 +47,8 @@ class SortTest {
     void bubbleSort() {
         Sort.bubbleSort(nums);
         assertArrayEquals(numSorted, nums);
+        Sort.bubbleSort(numsBest);
+        assertArrayEquals(numSorted, numsBest);
     }
 
     @Test

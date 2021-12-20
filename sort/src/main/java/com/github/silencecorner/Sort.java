@@ -63,10 +63,11 @@ public class Sort {
 
     /**
      * 冒泡排序，类似插入排序，每次处理一个最大的（每次拿到最大的，就像冒泡一样），
-     * 插入排序为前n个为有序一旦发现后面的数据大于最后一项进行下一项处理
+     * 插入排序为前n个为有序一旦发现后面的数据大于最后一项进行下一项处理 ，最差情况为O(n^2),最好情况是O(n),平均O(n^2)
      */
     public static void bubbleSort(int[] nums) {
         int forCount = 0;
+        boolean didSwap = false;
         for (int i = 0; i < nums.length; i++) {
 
             for (int j = 0; j < nums.length - i - 1; j++) {
@@ -74,10 +75,13 @@ public class Sort {
                     int tmp = nums[j];
                     nums[j] = nums[j + 1];
                     nums[j + 1] = tmp;
-                    forCount++;
+                    didSwap = true;
                 }
+                forCount++;
             }
-
+            if (!didSwap) {
+                break;
+            }
         }
 
         System.out.printf("bubble sorting for count %d \n", forCount);
