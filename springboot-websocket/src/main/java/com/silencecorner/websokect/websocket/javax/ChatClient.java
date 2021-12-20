@@ -2,11 +2,12 @@ package com.silencecorner.websokect.websocket.javax;
 
 import com.silencecorner.websokect.model.Message;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
@@ -43,6 +44,7 @@ public class ChatClient{
     this.url = url;
   }
 
+  private LinkedBlockingQueue<Message> waitForSend = new LinkedBlockingQueue<>();
   /**
    * 连接到服务端
    */
@@ -104,8 +106,8 @@ public class ChatClient{
   public void onMessage(Message message) throws Exception {
     logger.info("client on message: " + message);
     Thread.sleep(2000);
-    message.setTo("server" + integer.getAndAdd(1));
-    message.setContent("😀" + integer.get());
+    message.setTo("all");
+    message.setContent("😀" + integer.getAndIncrement());
     sendMessage(message);
   }
 
@@ -113,20 +115,48 @@ public class ChatClient{
    * 向服务端发送消息
    */
   public void sendMessage(Message message) throws IOException, EncodeException {
-    session.getBasicRemote().sendObject(message);
+      waitForSend.offer(message);
   }
 
-  public static void main(String[] args) throws InterruptedException {
-    CountDownLatch latch = new CountDownLatch(1);
+  public static void main(String[] args) {
+    // CountDownLatch latch = new CountDownLatch(1);
+    Scanner scanner = new Scanner(System.in);
     try {
       //后面的PathParam中文不行，只能使用英文字符
-      ChatClient chatClient = new ChatClient("ws://localhost:9000/chat/hi");
+      ChatClient chatClient = new ChatClient("ws://localhost:9000/chat/hi" + new Random().nextInt());
       chatClient.connect();
       chatClient.sendMessage(new Message("java client","java server","first send msg!"));
+      new Thread(() -> {
+        while (true){
+          try {
+              Message message = chatClient.getWaitForSend().take();
+              if (chatClient.getSession() != null) {
+                chatClient.getSession().getBasicRemote().sendObject(message);
+                System.out.printf("send msg: %s \n",message.toString());
+              }
+          } catch (IOException | EncodeException | InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+      }).start();
+      while (scanner.hasNextLine()){
+        chatClient.sendMessage(new Message("","all",scanner.nextLine()));
+      }
+      // Runtime.getRuntime().addShutdownHook(new Thread(latch::countDown));
+      // latch.await();
     }catch (Exception e){
-
-    }finally {
-      latch.await();
+      // ignore
+      e.printStackTrace();
+    } finally {
+      scanner.close();
     }
+  }
+
+  public Session getSession() {
+    return session;
+  }
+
+  public LinkedBlockingQueue<Message> getWaitForSend() {
+    return waitForSend;
   }
 }
