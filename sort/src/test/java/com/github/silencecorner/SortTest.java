@@ -27,6 +27,7 @@ class SortTest {
 
     @Test
     void shellSort() {
+        System.out.println(this.getClass().getClassLoader());
         Sort.shellSort(nums);
         assertArrayEquals(numSorted, nums);
     }
