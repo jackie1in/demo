@@ -33,11 +33,17 @@ subprojects {
 
 	// spring boot项目使用插件管理项目
 	if (it.name.startsWith('springboot')) {
+		apply plugin: "org.springframework.boot"
 		apply plugin: 'io.spring.dependency-management'
 
 		dependencies {
 			compile('org.springframework.boot:spring-boot-starter')
 			testCompile('org.springframework.boot:spring-boot-starter-test')
+			compileOnly 'org.projectlombok:lombok:1.18.22'
+			annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+			testCompileOnly 'org.projectlombok:lombok:1.18.22'
+			testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 		}
 		dependencyManagement {
 			imports {
