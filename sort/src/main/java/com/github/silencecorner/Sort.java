@@ -4,6 +4,33 @@ import java.util.Arrays;
 
 public class Sort {
 
+    /**
+     * 冒泡排序，类似插入排序，每次处理一个最大的（每次拿到最大的，就像冒泡一样），
+     * 插入排序为前n个为有序一旦发现后面的数据大于最后一项进行下一项处理 ，最差情况为O(n^2),最好情况是O(n),平均O(n^2)
+     */
+    public static void bubbleSort(int[] nums) {
+        int forCount = 0;
+        boolean didSwap = false;
+        for (int i = 0; i < nums.length; i++) {
+
+            for (int j = 0; j < nums.length - i - 1; j++) {
+                if (nums[j] > nums[j + 1]) {
+                    int tmp = nums[j];
+                    nums[j] = nums[j + 1];
+                    nums[j + 1] = tmp;
+                    didSwap = true;
+                }
+                forCount++;
+            }
+            if (!didSwap) {
+                break;
+            }
+        }
+
+        System.out.printf("bubble sorting for count %d \n", forCount);
+
+    }
+
     public static void insertSort(int[] nums) {
         int forCount = 0;
         if (nums == null || nums.length == 1) {
@@ -40,7 +67,7 @@ public class Sort {
         System.out.printf("shell sorting for count %d \n", forCount);
     }
 
-    public static void selectOrder(int[] nums) {
+    public static void selectSort(int[] nums) {
         for (int i = 0; i < nums.length; i++) {
             // 找出当前数组中的最小数字放到当前i的为止
             int tmpIndex = i;
@@ -61,39 +88,14 @@ public class Sort {
         }
     }
 
-    /**
-     * 冒泡排序，类似插入排序，每次处理一个最大的（每次拿到最大的，就像冒泡一样），
-     * 插入排序为前n个为有序一旦发现后面的数据大于最后一项进行下一项处理 ，最差情况为O(n^2),最好情况是O(n),平均O(n^2)
-     */
-    public static void bubbleSort(int[] nums) {
-        int forCount = 0;
-        boolean didSwap = false;
-        for (int i = 0; i < nums.length; i++) {
 
-            for (int j = 0; j < nums.length - i - 1; j++) {
-                if (nums[j] > nums[j + 1]) {
-                    int tmp = nums[j];
-                    nums[j] = nums[j + 1];
-                    nums[j + 1] = tmp;
-                    didSwap = true;
-                }
-                forCount++;
-            }
-            if (!didSwap) {
-                break;
-            }
-        }
-
-        System.out.printf("bubble sorting for count %d \n", forCount);
-
-    }
 
     /**
      * 快速排序
      *
      * @param nums 排序队列
      */
-    public static void quickSort(int start, int end, int[] nums) {
+    public static void quickSort(int[] nums, int start, int end) {
         if (start >= end) {
             return;
         }
@@ -127,9 +129,9 @@ public class Sort {
             left++;
         }
         // 递归排序左边
-        quickSort(start, left - 1, nums);
+        quickSort(nums, start, left - 1);
         // 递归排序右边
-        quickSort(left + 1, end, nums);
+        quickSort( nums,left + 1, end);
     }
 
     public static void quickSortFirst(int start, int end, int[] nums) {

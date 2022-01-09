@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SortTest {
@@ -26,36 +28,45 @@ class SortTest {
 
 
     @Test
-    void shellSort() {
-        System.out.println(this.getClass().getClassLoader());
-        Sort.shellSort(nums);
-        assertArrayEquals(numSorted, nums);
-    }
-
-    @Test
-    void selectOrder() {
-        Sort.selectOrder(nums);
-        assertArrayEquals(numSorted, nums);
-    }
-
-    @Test
-    void insertSort() {
-        Sort.insertSort(nums);
-        assertArrayEquals(numSorted, nums);
-    }
-
-    @Test
     void bubbleSort() {
-        Sort.bubbleSort(nums);
+        SortRecall.bubbleSort(nums);
         assertArrayEquals(numSorted, nums);
         Sort.bubbleSort(numsBest);
         assertArrayEquals(numSorted, numsBest);
     }
+    @Test
+    void selectOrder() {
+        SortRecall.selectSort(nums);
+        assertArrayEquals(numSorted, nums);
+    }
+    @Test
+    void insertSort() {
+        SortRecall.insertSort(nums);
+        assertArrayEquals(numSorted, nums);
+    }
+
+    @Test
+    void shellSort() {
+        System.out.println(this.getClass().getClassLoader());
+        SortRecall.shellSort(nums);
+        System.out.println(Arrays.toString(nums));
+        assertArrayEquals(numSorted, nums);
+    }
+
 
     @Test
     void quickSort() {
-        Sort.quickSort(0, nums.length - 1, nums);
+        Sort.quickSort(nums, 0, nums.length - 1);
         assertArrayEquals(numSorted, nums);
+        init1();
+        SortRecall.quickSort(nums,0, nums.length - 1 );
+        assertArrayEquals(numSorted, nums);
+
+        Sort.quickSort(numSorted, 0, nums.length - 1);
+        assertArrayEquals(numSorted, numSorted);
+        init1();
+        SortRecall.quickSort(numSorted,0, nums.length - 1 );
+        assertArrayEquals(numSorted, numSorted);
     }
 
     @Test
@@ -72,8 +83,11 @@ class SortTest {
 
     @Test
     void mergeSort() {
-        Sort.mergeSort(new int[]{4,2,3,1});
-        // assertArrayEquals(numSorted, nums);
+        Sort.mergeSort(nums);
+        assertArrayEquals(numSorted, nums);
+        init1();
+        SortRecall.mergeSort(nums);
+        assertArrayEquals(numSorted, nums);
     }
 
     @Test
