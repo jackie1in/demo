@@ -56,17 +56,17 @@ class SortTest {
 
     @Test
     void quickSort() {
-        Sort.quickSort(nums, 0, nums.length - 1);
-        assertArrayEquals(numSorted, nums);
-        init1();
+//        Sort.quickSort(nums, 0, nums.length - 1);
+//        assertArrayEquals(numSorted, nums);
+//        init1();
         SortRecall.quickSort(nums,0, nums.length - 1 );
         assertArrayEquals(numSorted, nums);
 
-        Sort.quickSort(numSorted, 0, nums.length - 1);
-        assertArrayEquals(numSorted, numSorted);
-        init1();
-        SortRecall.quickSort(numSorted,0, nums.length - 1 );
-        assertArrayEquals(numSorted, numSorted);
+//        Sort.quickSort(numSorted, 0, nums.length - 1);
+//        assertArrayEquals(numSorted, numSorted);
+//        init1();
+//        SortRecall.quickSort(numSorted,0, nums.length - 1 );
+//        assertArrayEquals(numSorted, numSorted);
     }
 
     @Test

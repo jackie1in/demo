@@ -1,7 +1,9 @@
 package com.github.silencecorner.kafka;
 
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
@@ -141,19 +143,12 @@ public class ConsumerWorkHandler<K, V> implements Runnable {
                                 return null;
                             })));
                         }
+                        long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
                         try {
                             latch.await(doWorkMs, TimeUnit.MILLISECONDS);
-                            long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
-                            consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
-                        } catch (InterruptedException e) { // 同步所有返回结果时超时
-                            // 可全部打印日志
-                            // 如果其中一个失败了，这一批都重新消费，提交第一个offset - 1信息
-                            long lastOffset = partitionRecords.get(0).offset() - 1;
-                            if (lastOffset < 0) {
-                                // 小于就不提交了
-                                continue;
-                            }
-                            consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
+                            consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset)));
+                        } catch (KafkaException | InterruptedException e) { // 同步所有返回结果时超时,提交任务时发生异常
+                            consumer.seek(partition, lastOffset);
                         }
                     }
                 } else {
