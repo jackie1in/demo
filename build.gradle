@@ -2,14 +2,15 @@ buildscript {
 	repositories {
 		mavenLocal()
 		maven {url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+		maven {url "https://plugins.gradle.org/m2/"}
 		mavenCentral()
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 		classpath "com.netflix.nebula:gradle-extra-configurations-plugin:3.2.0"
+		classpath "gradle.plugin.com.google.cloud.tools:jib-gradle-plugin:3.2.0"
 	}
 }
-
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'idea'
@@ -35,16 +36,18 @@ subprojects {
 	if (it.name.startsWith('springboot')) {
 		apply plugin: "org.springframework.boot"
 		apply plugin: 'io.spring.dependency-management'
+		apply plugin: 'com.google.cloud.tools.jib'
 
 		dependencies {
 			compile('org.springframework.boot:spring-boot-starter')
 			testCompile('org.springframework.boot:spring-boot-starter-test')
 			compileOnly 'org.projectlombok:lombok:1.18.22'
 			annotationProcessor 'org.projectlombok:lombok:1.18.22'
-
 			testCompileOnly 'org.projectlombok:lombok:1.18.22'
-			testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 		}
+
+		jib.to.image = "hilin/${project.name}:${version}"
+
 		dependencyManagement {
 			imports {
 				mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
