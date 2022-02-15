@@ -46,7 +46,7 @@ subprojects {
 			testCompileOnly 'org.projectlombok:lombok:1.18.22'
 		}
 
-		jib.to.image = "hilin/${project.name}:${version}"
+		jib.to.image = "${project_id}/${project.name}:${version}"
 
 		dependencyManagement {
 			imports {

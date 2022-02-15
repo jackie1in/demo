@@ -6,3 +6,7 @@ jvm language demo projects, such as java kotlin
 ```
 ./gradlew clean :springboot-data-jpa-test:build -x test
 ```
+#### jib打包
+```bash
+./gradlew jib -x test 
+```
