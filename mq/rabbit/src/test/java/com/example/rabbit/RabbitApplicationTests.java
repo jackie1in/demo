@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.concurrent.CountDownLatch;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RabbitApplicationTests {
     private static Logger logger = LoggerFactory.getLogger(RabbitApplicationTests.class);
     @Test
@@ -21,7 +21,7 @@ class RabbitApplicationTests {
     private RabbitTemplate rabbitTemplate;
     @Test
     public void whenSendToNonBlockingQueue_thenAllMessageProcessed() throws Exception {
-        int nb = 2;
+        int nb = 10;
 
         CountDownLatch latch = new CountDownLatch(nb);
         retryQueues.setObserver(() -> latch.countDown());
