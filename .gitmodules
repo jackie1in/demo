@@ -1,0 +1,3 @@
+[submodule "mq/rabbitmq-compose"]
+	path = mq/rabbitmq-compose
+	url = git@github.com:micahhausler/rabbitmq-compose.git

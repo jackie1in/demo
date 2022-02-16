@@ -8,3 +8,5 @@ include 'leetcode'
 include 'mq'
 
 include 'mq:kafka'
+include 'mq:rabbit'
+
