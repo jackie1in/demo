@@ -12,6 +12,8 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG;
+
 public class ConsumerTest {
     private final static Logger logger = LoggerFactory.getLogger(ConsumerTest.class);
     // 不实用线程池运行，这些线程需要一直执行，使用线程池属于浪费，只有当进程kill时会被关闭
@@ -121,6 +123,7 @@ public class ConsumerTest {
         props.put("bootstrap.servers", "localhost:9092,localhost:9093,localhost:9094,localhost:9095,localhost:9096");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.IntegerDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.IntegerDeserializer");
+        props.put(MAX_POLL_RECORDS_CONFIG, 1000);
         return props;
 
     }

@@ -17,6 +17,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
+
 public class ConsumerWorkHandler<K, V> implements Runnable {
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -47,6 +49,8 @@ public class ConsumerWorkHandler<K, V> implements Runnable {
                 1000,
                 workPoolSize,
                 pollMs,
+                1000,
+                1000,
                 doWorkMs,
                 work);
     }
@@ -61,23 +65,28 @@ public class ConsumerWorkHandler<K, V> implements Runnable {
                                Integer autoCommitIntervalMs,
                                int workPoolSize,
                                long pollMs,
+                               long maxPollIntervalMs,
+                               long maxPollRecords,
                                long doWorkMs,
                                Function<ConsumerRecord<K, V>, Void> work) {
 
         Properties props = new Properties();
         // 这里可以不用写完
-        props.put("bootstrap.servers", bootstrapServers);
-        props.put("group.id", groupId);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         if (clientId != null) {
-            props.put("client.id", clientId);
+            props.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);
         }
         if (transaction) {
             // 设置数据可见行
-            props.put("isolation.level", "read_committed");
+            props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         }
-        props.put("enable.auto.commit", autoCommit);
+        // 太小会触发rebalance
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollIntervalMs);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords > 1000 ? 1000 : maxPollRecords);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, autoCommit);
         if (autoCommit) {
-            props.put("auto.commit.interval.ms", autoCommitIntervalMs);
+            props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, autoCommitIntervalMs);
         }
         this.autoCommit = autoCommit;
         this.consumer = new KafkaConsumer<>(props, keyDeserializer, valueDeserializer);

@@ -2,7 +2,9 @@ rootProject.name = 'demo'
 include 'springboot-data-jpa-test'
 include 'springboot-websocket'
 include 'basic'
-include 'mq'
 include 'sort'
 include 'leetcode'
 
+include 'mq'
+
+include 'mq:kafka'
