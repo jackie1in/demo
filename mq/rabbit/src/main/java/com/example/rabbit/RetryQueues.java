@@ -2,17 +2,18 @@ package com.example.rabbit;
 
 import org.springframework.amqp.core.Queue;
 
+import java.time.Duration;
+
 public class RetryQueues {
     private Queue[] queues;
-    private long initialInterval;
-    private double factor;
-    private long maxWait;
+    private Duration[] delay;
 
-    public RetryQueues(long initialInterval, double factor, long maxWait, Queue... queues) {
+    public RetryQueues(Duration[] delayMills, Queue... queues) {
+        if (delayMills.length != queues.length) {
+            throw new IllegalArgumentException("重试队列和时间长度需保持一致");
+        }
         this.queues = queues;
-        this.initialInterval = initialInterval;
-        this.factor = factor;
-        this.maxWait = maxWait;
+        this.delay = delayMills;
     }
 
     public boolean retriesExhausted(int retry) {
@@ -23,12 +24,11 @@ public class RetryQueues {
         return queues[retry].getName();
     }
 
-    public long getTimeToWait(int retry) {
-        double time = initialInterval * Math.pow(factor, (double) retry);
-        if (time > maxWait) {
-            return maxWait;
+    public long getDelayMills(int retry) {
+        if (retry >= delay.length) {
+            return -1;
         }
 
-        return (long) time;
+        return delay[retry].toMillis();
     }
 }

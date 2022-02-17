@@ -90,7 +90,7 @@ public class RetryQueuesInterceptor implements MethodInterceptor {
 
         rabbitTemplate.convertAndSend(retryQueueName, mac.message, m -> {
             MessageProperties props = m.getMessageProperties();
-            props.setExpiration(String.valueOf(retryQueues.getTimeToWait(retryCount)));
+            props.setExpiration(String.valueOf(retryQueues.getDelayMills(retryCount)));
             props.setHeader("x-retried-count", String.valueOf(retryCount + 1));
             props.setHeader("x-original-exchange", props.getReceivedExchange());
             props.setHeader("x-original-routing-key", props.getReceivedRoutingKey());
