@@ -17,11 +17,14 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.util.List;
 
 @Configuration
 public class RabbitConfiguration {
@@ -30,6 +33,29 @@ public class RabbitConfiguration {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+
+    @Autowired
+    private ConfigurableBeanFactory beanFactory;
+    // now 5s 30m 2h 1d
+    //private Duration[] delay = {Duration.ofSeconds(5), Duration.ofMinutes(30), Duration.ofHours(2), Duration.ofDays(1)};
+    private Duration[] delay = {Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(10)};
+    @PostConstruct
+    public void createQueues(){
+        for (int i = 0; i < delay.length; i++) {
+            beanFactory.registerSingleton("retryQueue" + i,
+                    QueueBuilder.durable("retry-queue-" + i)
+                            .deadLetterExchange("")
+                            .deadLetterRoutingKey("retry-wait-ended-queue")
+                            .build());
+        }
+    }
+
+
+    @Bean
+    public RetryQueues retryQueues(List<Queue> queues) {
+        return new RetryQueues(delay, queues.stream().filter(queue -> queue.getName().startsWith("retry-queue-")).toArray(Queue[]::new));
+    }
 
     @Bean
     public Queue connectorQueue() {
@@ -43,48 +69,6 @@ public class RabbitConfiguration {
                 .build();
     }
 
-    @Bean
-    public Queue retryQueue1() {
-        return QueueBuilder.durable("retry-queue-1")
-                .deadLetterExchange("")
-                .deadLetterRoutingKey("retry-wait-ended-queue")
-                .build();
-    }
-
-    @Bean
-    public Queue retryQueue2() {
-        return QueueBuilder.durable("retry-queue-2")
-                .deadLetterExchange("")
-                .deadLetterRoutingKey("retry-wait-ended-queue")
-                .build();
-    }
-
-    @Bean
-    public Queue retryQueue3() {
-        return QueueBuilder.durable("retry-queue-3")
-                .deadLetterExchange("")
-                .deadLetterRoutingKey("retry-wait-ended-queue")
-                .build();
-    }
-
-    @Bean
-    public Queue retryQueue4() {
-        return QueueBuilder.durable("retry-queue-3")
-                .deadLetterExchange("")
-                .deadLetterRoutingKey("retry-wait-ended-queue")
-                .build();
-    }
-
-    @Bean
-    // now 5s 30m 2h 1d
-    public RetryQueues retryQueues(@Qualifier("retryQueue1") Queue retryQueue1,
-                                   @Qualifier("retryQueue2") Queue retryQueue2,
-                                   @Qualifier("retryQueue3") Queue retryQueue3,
-                                   @Qualifier("retryQueue4") Queue retryQueue4) {
-        //Duration[] delay = new Duration[]{Duration.ofSeconds(5), Duration.ofMinutes(30), Duration.ofHours(2), Duration.ofDays(1)};
-        Duration[] delay = new Duration[]{Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(5)};
-        return new RetryQueues(delay, retryQueue1, retryQueue2, retryQueue3, retryQueue4);
-    }
 
     @Bean
     public ObservableRejectAndDontRequeueRecoverer observableRecoverer() {

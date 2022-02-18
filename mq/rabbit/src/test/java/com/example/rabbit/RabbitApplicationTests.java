@@ -25,7 +25,7 @@ class RabbitApplicationTests {
     private RabbitTemplate rabbitTemplate;
     @Test
     public void whenSendToNonBlockingQueue_thenAllMessageProcessed() throws Exception {
-        int nb = 10;
+        int nb = 1;
 
         CountDownLatch latch = new CountDownLatch(nb);
         retryQueues.setObserver(() -> latch.countDown());
