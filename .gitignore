@@ -27,3 +27,4 @@ nbdist/
 out
 *.txt
 source
+bin

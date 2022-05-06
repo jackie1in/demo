@@ -59,7 +59,6 @@ public class SpringDataJpaTestTest {
         userDao.saveAll(users);
     }
     @Test
-    @SuppressWarnings("unchecked")
     public void dynamicProjectionTest(){
         //because of UserDto properties don't have setter,cannot be used for spring BeanUtils.copyProperties()  target argument
         List<UserDto> userDtoList = userDao.findAllByStatus(1, UserDto.class);

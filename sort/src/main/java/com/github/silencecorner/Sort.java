@@ -1,7 +1,6 @@
 package com.github.silencecorner;
 
-import java.util.*;
-import java.util.function.IntFunction;
+import java.util.Arrays;
 
 public class Sort {
 

@@ -5,8 +5,6 @@ import com.example.rabbit.dto.Msg;
 import com.example.rabbit.dto.OogeMsg;
 import com.example.rabbit.dto.OogeOperation;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +13,6 @@ import java.util.concurrent.CountDownLatch;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RabbitApplicationTests {
-    private static Logger logger = LoggerFactory.getLogger(RabbitApplicationTests.class);
     @Test
     void contextLoads() {
     }

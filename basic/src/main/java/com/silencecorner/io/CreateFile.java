@@ -2,7 +2,6 @@ package com.silencecorner.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 public class CreateFile {
     private static final String byteSourceFile = "byteSourceFile.txt";

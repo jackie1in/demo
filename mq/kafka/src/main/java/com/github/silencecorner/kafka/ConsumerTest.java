@@ -21,7 +21,7 @@ public class ConsumerTest {
     private static AtomicBoolean closed = new AtomicBoolean(false);
 
     public static void main(String[] args) throws InterruptedException {
-        int consumerCount = 5;
+        // int consumerCount = 5;
         ConsumerWorkHandler<?, ?> consumerWorkHandler = ConsumerTest.atMostOnce();
 //        for (int i = 0; i < consumerCount; i++) {
 //            EXECUTOR_SERVICE.execute(ConsumerTest::atMostOnce);

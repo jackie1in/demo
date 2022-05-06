@@ -1,26 +1,20 @@
 package com.silencecorner.websokect.websocket.javax;
 
 import com.silencecorner.websokect.model.Message;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.websocket.ClientEndpoint;
-import javax.websocket.CloseReason;
-import javax.websocket.ContainerProvider;
-import javax.websocket.EncodeException;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.websocket.*;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author hai

@@ -31,16 +31,17 @@ public class JavaElementaryKnowledge {
         JavaElementaryKnowledge knowledge = new JavaElementaryKnowledge();
         knowledge.setS(s);
         knowledge.setSs("单个对象转换");
-        String sss = (String) knowledge.getSs();
-        String[] ss = (String[])knowledge.getS();
+        // String sss = (String) knowledge.getSs();
+        // String[] ss = (String[])knowledge.getS();
         knowledge.setS(Arrays.asList("List to array","testing").toArray());
-        String[] ss1 = (String[])knowledge.getS();
+        // String[] ss1 = (String[])knowledge.getS();
         knowledge.setS(new ArrayList<String>(){{
             add("array list to array");
             add("testing");
         }}.toArray());
         try {
             String[] ss3 = (String[])knowledge.getS();
+            System.out.println(ss3);
         }catch (ClassCastException e){
             System.out.println("deep copy不能使用强制转换");
         }

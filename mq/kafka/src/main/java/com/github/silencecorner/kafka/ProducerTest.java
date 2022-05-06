@@ -3,7 +3,6 @@ package com.github.silencecorner.kafka;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.KafkaException;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;

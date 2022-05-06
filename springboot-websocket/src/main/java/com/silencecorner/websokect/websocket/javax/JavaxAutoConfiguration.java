@@ -1,8 +1,5 @@
 package com.silencecorner.websokect.websocket.javax;
 
-import com.silencecorner.websokect.model.Message;
-import java.io.IOException;
-import javax.websocket.EncodeException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

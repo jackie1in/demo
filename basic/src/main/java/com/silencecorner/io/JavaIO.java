@@ -18,7 +18,7 @@ public class JavaIO {
         //参数mode的有r读、rw读写,至于rws和rwd模式还不知怎么去用
         try(RandomAccessFile inAndOut = new RandomAccessFile(file, "rw");) {
 
-            String str = "这是一个随机流"; //7x2 = 14 byte
+            // String str = "这是一个随机流"; //7x2 = 14 byte
             //也可以使用str.getBytes()来获取str的byte数组表示，这里实验时粘贴过来的
             byte[] byteArr = new byte[]{-113, -39, 102, 47, 78, 0, 78, 42, -106, -113, 103, 58, 109, 65};
             //写500个字符串进去
