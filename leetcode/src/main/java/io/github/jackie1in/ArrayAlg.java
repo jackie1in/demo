@@ -1,3 +1,5 @@
+package io.github.jackie1in;
+
 public class ArrayAlg {
     /**
      * 旋转数组暴力解法，每次移动一次
